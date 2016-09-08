@@ -41,13 +41,16 @@ public class VideoToFrames implements Runnable {
 
     private Callback callback;
 
-    public interface Callback{
+    public interface Callback {
         void onFinishDecode();
+
         void onDecodeFrame(int index);
     }
-    public void setCallback(Callback callback){
-        this.callback=callback;
+
+    public void setCallback(Callback callback) {
+        this.callback = callback;
     }
+
     public void setEnqueue(LinkedBlockingQueue<byte[]> queue) {
         mQueue = queue;
     }
@@ -173,7 +176,7 @@ public class VideoToFrames implements Runnable {
                 boolean doRender = (info.size != 0);
                 if (doRender) {
                     outputFrameCount++;
-                    if(callback!=null){
+                    if (callback != null) {
                         callback.onDecodeFrame(outputFrameCount);
                     }
                     Image image = decoder.getOutputImage(outputBufferId);
@@ -212,7 +215,7 @@ public class VideoToFrames implements Runnable {
                 }
             }
         }
-        if(callback!=null) {
+        if (callback != null) {
             callback.onFinishDecode();
         }
     }
