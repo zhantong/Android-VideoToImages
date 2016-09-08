@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">VideoToImages</string>
+    <string name="video_file_path">视频文件路径</string>
+    <string name="choose_video_file">选择视频文件</string>
+    <string name="folder_name_created">生成文件夹名</string>
+    <string name="image_type_created">生成图片格式</string>
+    <string name="start">开始</string>
+</resources>
