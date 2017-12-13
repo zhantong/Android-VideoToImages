@@ -5,10 +5,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -113,7 +116,7 @@ public class MainActivity extends Activity implements VideoToFrames.Callback {
         intent.setType("*/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(Intent.createChooser(intent, "Select a File"), requestCode);
+            startActivityForResult(Intent.createChooser(intent, "选择视频文件"), requestCode);
         } else {
             new AlertDialog.Builder(this).setTitle("未找到文件管理器")
                     .setMessage("请安装文件管理器以选择文件")
@@ -131,7 +134,7 @@ public class MainActivity extends Activity implements VideoToFrames.Callback {
         }
         if (resultCode == Activity.RESULT_OK) {
             EditText editText = (EditText) findViewById(id);
-            String curFileName = data.getData().getPath();
+            String curFileName = getRealPathFromURI(data.getData());
             editText.setText(curFileName);
         }
     }
@@ -151,5 +154,20 @@ public class MainActivity extends Activity implements VideoToFrames.Callback {
         Message msg = handler.obtainMessage();
         msg.obj = "完成！所有图片已存储到" + outputDir;
         handler.sendMessage(msg);
+    }
+
+    private String getRealPathFromURI(Uri contentURI) {
+        String result;
+        String[] proj = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(contentURI, proj, null, null, null);
+        if (cursor == null) { // Source is Dropbox or other similar local file path
+            result = contentURI.getPath();
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
+        }
+        return result;
     }
 }
