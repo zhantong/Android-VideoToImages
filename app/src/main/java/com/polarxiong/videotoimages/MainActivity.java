@@ -1,12 +1,17 @@
 package com.polarxiong.videotoimages;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -14,9 +19,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements VideoToFrames.Callback {
     private static final int REQUEST_CODE_GET_FILE_PATH = 1;
+    private static final int PERMISSION_WRITE_EXTERNAL_STORAGE = 1;
     private OutputImageFormat outputImageFormat;
     private MainActivity self = this;
     private String outputDir;
@@ -39,7 +46,11 @@ public class MainActivity extends Activity implements VideoToFrames.Callback {
         buttonFilePathInput.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFilePath(REQUEST_CODE_GET_FILE_PATH);
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_WRITE_EXTERNAL_STORAGE);
+                } else {
+                    getFilePath(REQUEST_CODE_GET_FILE_PATH);
+                }
             }
         });
 
@@ -62,6 +73,21 @@ public class MainActivity extends Activity implements VideoToFrames.Callback {
                 }
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_WRITE_EXTERNAL_STORAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    getFilePath(REQUEST_CODE_GET_FILE_PATH);
+                } else {
+                    Toast.makeText(this, "需要开启文件读写权限", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 
     private void initImageFormatSpinner() {
